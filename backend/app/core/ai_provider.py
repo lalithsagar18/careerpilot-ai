@@ -188,6 +188,62 @@ class MockAIProvider(AIProvider):
                 "suggested_revisions": []
             })
 
+        if schema_name == "LearningPlanCreate":
+            return schema.model_validate({
+                "target_role": "Senior AI / Backend Engineer",
+                "summary": "Targeted curriculum designed to bridge verified skill gaps and achieve top-tier candidate alignment.",
+                "estimated_weeks": 6,
+                "items": [
+                    {
+                        "skill_name": "Distributed Systems & Concurrency",
+                        "priority": "high",
+                        "difficulty": "advanced",
+                        "objectives": ["Master async event loops", "Implement distributed locking"],
+                        "resources": ["Official Documentation", "Advanced Systems Design"],
+                        "project_suggestion": "Build high-throughput async processing pipeline.",
+                        "interview_practice_prompt": "Explain how to handle backpressure in distributed pipelines.",
+                        "order_index": 1
+                    },
+                    {
+                        "skill_name": "LangGraph & Multi-Agent State Machines",
+                        "priority": "high",
+                        "difficulty": "intermediate",
+                        "objectives": ["Build stateful cyclic graphs", "Implement human-in-the-loop checkpoints"],
+                        "resources": ["LangGraph Documentation", "Agentic Design Patterns"],
+                        "project_suggestion": "Build a multi-agent resume evaluator workflow.",
+                        "interview_practice_prompt": "How do you prevent infinite loops in agentic state graphs?",
+                        "order_index": 2
+                    }
+                ]
+            })
+
+        if schema_name == "ResumeOptimizationResponse":
+            return schema.model_validate({
+                "ats_score_before": 72.0,
+                "ats_score_projected": 94.0,
+                "targeted_keywords_matched": ["FastAPI", "PostgreSQL", "Docker", "LangGraph", "Microservices"],
+                "bullet_rewrites": [
+                    {
+                        "section": "Work Experience",
+                        "original_bullet": "Built backend APIs for internal data processing.",
+                        "optimized_bullet": "Engineered high-throughput FastAPI REST endpoints integrated with PostgreSQL, reducing processing latency by 35% and improving platform reliability.",
+                        "rationale": "Incorporated framework keywords and quantified impact metrics.",
+                        "keywords_added": ["FastAPI", "PostgreSQL", "High-Throughput"],
+                        "factual_verification_note": "Verified against candidate backend engineering achievements."
+                    }
+                ],
+                "full_optimized_content": "Experienced Full-Stack & AI Engineer specializing in Python, FastAPI, React, and Multi-Agent Systems."
+            })
+
+        if schema_name == "CoverLetterResponse":
+            return schema.model_validate({
+                "subject_line": "Application for Senior Engineer — Candidate",
+                "content": "Dear Hiring Manager,\n\nI am writing to express my strong enthusiasm for the role. With over 5 years of verified experience building scalable systems and agentic workflows using Python, FastAPI, and PostgreSQL, I look forward to contributing immediately to your team's mission.\n\nSincerely,\nCandidate",
+                "key_qualifications_highlighted": ["Python", "FastAPI", "PostgreSQL", "System Design"],
+                "tone": "professional",
+                "word_count": 80
+            })
+
         # Generic fallback
         return schema.model_construct()
 

@@ -1,6 +1,17 @@
 from typing import TypedDict, Optional, Dict, Any, List
-from langgraph.graph import StateGraph, END
 import json
+import logging
+
+logger = logging.getLogger("careerpilot.workflow")
+
+try:
+    from langgraph.graph import StateGraph, END
+    LANGGRAPH_AVAILABLE = True
+except ImportError:
+    StateGraph = None
+    END = "__end__"
+    LANGGRAPH_AVAILABLE = False
+
 
 from app.schemas.resume import CandidateProfile
 from app.schemas.job import StructuredJobData
@@ -102,6 +113,10 @@ async def human_checkpoint_node(state: CareerWorkflowState) -> Dict[str, Any]:
     }
 
 def build_career_graph():
+    if not LANGGRAPH_AVAILABLE:
+        logger.info("LangGraph is not installed; using standard sequential execution fallback.")
+        return None
+
     builder = StateGraph(CareerWorkflowState)
     builder.add_node("skill_gap_node", skill_gap_node)
     builder.add_node("generator_node", generator_node)
@@ -127,3 +142,4 @@ def build_career_graph():
     return builder.compile()
 
 career_workflow_app = build_career_graph()
+

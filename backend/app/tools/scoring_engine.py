@@ -195,3 +195,92 @@ class DeterministicScoringEngine:
         )
 
         return breakdown, matched_skills, missing_skills, partial_skills
+
+
+# Streamlit & API Compatibility layer
+from pydantic import BaseModel, Field
+
+class SkillItem(BaseModel):
+    name: str
+    category: str = "Technical"
+    years_experience: float = 1.0
+    proficiency: str = "intermediate"
+    importance: str = "required"
+
+class JobRequirements(BaseModel):
+    required_skills: List[SkillItem] = Field(default_factory=list)
+    preferred_skills: List[SkillItem] = Field(default_factory=list)
+    min_years_experience: float = 0.0
+    preferred_years_experience: float = 0.0
+    min_education_level: str = "bachelor"
+    required_keywords: List[str] = Field(default_factory=list)
+
+class CompatibilityScoreResult(BaseModel):
+    overall_score: float
+    match_tier: str
+    dimension_breakdown: Dict[str, float]
+    matched_skills: List[Dict[str, Any]]
+    missing_skills: List[Dict[str, Any]]
+
+def calculate_compatibility_score(candidate_profile: Any, job_requirements: Any) -> CompatibilityScoreResult:
+    """Helper bridging Streamlit/Frontend data models to DeterministicScoringEngine."""
+    if isinstance(candidate_profile, CandidateProfile) and isinstance(job_requirements, StructuredJobData):
+        breakdown, matched, missing, partial = DeterministicScoringEngine.calculate_match(candidate_profile, job_requirements)
+        tier = "strong" if breakdown.overall_score >= 80 else ("moderate" if breakdown.overall_score >= 60 else "gap")
+        return CompatibilityScoreResult(
+            overall_score=breakdown.overall_score,
+            match_tier=tier,
+            dimension_breakdown={
+                "required_skills": breakdown.required_skill_score,
+                "preferred_skills": breakdown.preferred_skill_score,
+                "experience_alignment": breakdown.experience_score,
+                "domain_relevance": breakdown.technology_score,
+                "education_certification": breakdown.education_score,
+                "keyword_density": breakdown.technology_score
+            },
+            matched_skills=[{"skill_name": m.skill_name, "candidate_years": 3, "required_years": 3} for m in matched],
+            missing_skills=[{"skill_name": m.skill_name, "importance": m.importance, "time_to_acquire_days": 21} for m in missing]
+        )
+    
+    # Adapt CandidateProfile and JobRequirements fallback
+    req_skills = [s.name if hasattr(s, 'name') else str(s) for s in getattr(job_requirements, 'required_skills', [])]
+    pref_skills = [s.name if hasattr(s, 'name') else str(s) for s in getattr(job_requirements, 'preferred_skills', [])]
+    cand_skills = [s.name if hasattr(s, 'name') else str(s) for s in getattr(candidate_profile, 'skills', [])]
+    cand_tech = getattr(candidate_profile, 'technical_skills', cand_skills)
+    
+    cand = CandidateProfile(
+        full_name=getattr(candidate_profile, 'full_name', 'Candidate'),
+        summary=getattr(candidate_profile, 'summary', ''),
+        total_years_experience=float(getattr(candidate_profile, 'total_years_experience', 5.0)),
+        technical_skills=cand_tech or cand_skills or ["Python", "FastAPI", "PostgreSQL"],
+        experience=[],
+        education=[]
+    )
+    
+    job = StructuredJobData(
+        title="Target Role",
+        company="Target Company",
+        required_skills=req_skills or ["Python", "FastAPI"],
+        preferred_skills=pref_skills,
+        required_years_experience=float(getattr(job_requirements, 'min_years_experience', 3.0)),
+        required_technologies=req_skills[:3] if req_skills else ["Python"],
+        keywords=getattr(job_requirements, 'required_keywords', req_skills)
+    )
+    
+    breakdown, matched, missing, partial = DeterministicScoringEngine.calculate_match(cand, job)
+    tier = "strong" if breakdown.overall_score >= 80 else ("moderate" if breakdown.overall_score >= 60 else "gap")
+    return CompatibilityScoreResult(
+        overall_score=breakdown.overall_score,
+        match_tier=tier,
+        dimension_breakdown={
+            "required_skills": breakdown.required_skill_score,
+            "preferred_skills": breakdown.preferred_skill_score,
+            "experience_alignment": breakdown.experience_score,
+            "domain_relevance": breakdown.technology_score,
+            "education_certification": breakdown.education_score,
+            "keyword_density": breakdown.technology_score
+        },
+        matched_skills=[{"skill_name": m.skill_name, "candidate_years": 3, "required_years": 3} for m in matched],
+        missing_skills=[{"skill_name": m.skill_name, "importance": m.importance, "time_to_acquire_days": 21} for m in missing]
+    )
+

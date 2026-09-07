@@ -257,6 +257,19 @@ def run_async(coro):
         asyncio.set_event_loop(loop)
     return loop.run_until_complete(coro)
 
+def to_dict(obj):
+    if obj is None:
+        return {}
+    if isinstance(obj, dict):
+        return obj
+    if hasattr(obj, "model_dump"):
+        return obj.model_dump()
+    if hasattr(obj, "dict"):
+        return obj.dict()
+    if hasattr(obj, "__dict__"):
+        return vars(obj)
+    return {}
+
 # Session state initialization
 if "profile" not in st.session_state:
     st.session_state.profile = None
@@ -524,17 +537,23 @@ elif page == "✨ Resume Optimizer":
                 job_requirements={"title": target_role, "required_skills": kw_list},
                 target_keywords=kw_list
             ))
-            st.session_state.opt_result = opt_result
+            st.session_state.opt_result = to_dict(opt_result)
             st.success("Bullet rewrites ready!")
             
-    if "opt_result" in st.session_state:
-        res = st.session_state.opt_result
+    if "opt_result" in st.session_state and st.session_state.opt_result:
+        res = to_dict(st.session_state.opt_result)
         st.write("### 📝 Suggested Bullet Enhancements")
-        for bullet in res.get("bullet_rewrites", []):
+        for bullet_raw in res.get("bullet_rewrites", []):
+            bullet = to_dict(bullet_raw)
             with st.expander(f"📌 Section: {bullet.get('section', 'Experience')}", expanded=True):
                 st.error(f"**Original:** {bullet.get('original', '')}")
                 st.success(f"**Optimized:** {bullet.get('optimized', '')}")
-                st.caption(f"💡 **Rationale:** {bullet.get('rationale', '')} | Keywords added: {', '.join(bullet.get('keywords_added', []))}")
+                added_kw = bullet.get('keywords_added', [])
+                if isinstance(added_kw, list):
+                    added_kw_str = ', '.join([str(k) for k in added_kw])
+                else:
+                    added_kw_str = str(added_kw)
+                st.caption(f"💡 **Rationale:** {bullet.get('rationale', '')} | Keywords added: {added_kw_str}")
 
 # ==========================================
 # PAGE 5: COVER LETTER GENERATOR
@@ -553,15 +572,21 @@ elif page == "✉️ Cover Letter Generator":
                 job_data={"title": "Senior AI Full-Stack Engineer", "company_name": "TechNova", "description": "AI systems and full stack applications."},
                 tone=tone
             ))
-            st.session_state.cover_letter = cl_res
+            cl_dict = to_dict(cl_res)
+            if not cl_dict.get("content") and cl_dict.get("full_cover_letter_markdown"):
+                cl_dict["content"] = cl_dict["full_cover_letter_markdown"]
+            if not cl_dict.get("subject_line"):
+                cl_dict["subject_line"] = "Application for Senior AI Full-Stack Engineer — Alex Rivera"
+            st.session_state.cover_letter = cl_dict
             st.success("Cover letter generated!")
             
-    if "cover_letter" in st.session_state:
-        cl = st.session_state.cover_letter
+    if "cover_letter" in st.session_state and st.session_state.cover_letter:
+        cl = to_dict(st.session_state.cover_letter)
         st.markdown("---")
         st.subheader(f"Subject: {cl.get('subject_line', 'Application')}")
-        st.text_area("Cover Letter Content", value=cl.get("content", ""), height=350)
-        st.download_button("📥 Download Cover Letter (.txt)", cl.get("content", ""), file_name="cover_letter.txt")
+        letter_content = cl.get("content", "") or cl.get("full_cover_letter_markdown", "")
+        st.text_area("Cover Letter Content", value=letter_content, height=350)
+        st.download_button("📥 Download Cover Letter (.txt)", letter_content, file_name="cover_letter.txt")
 
 # ==========================================
 # PAGE 6: MOCK INTERVIEW SIMULATOR
@@ -582,12 +607,12 @@ elif page == "🎙️ Mock Interview Simulator":
         with st.spinner("Adaptive Interview Agent generating prompt..."):
             agent = AdaptiveInterviewAgent()
             q = run_async(agent.generate_question(int_role, int_cat, int_diff, []))
-            st.session_state.current_question = q
+            st.session_state.current_question = to_dict(q)
             
-    if "current_question" in st.session_state:
-        q = st.session_state.current_question
+    if "current_question" in st.session_state and st.session_state.current_question:
+        q = to_dict(st.session_state.current_question)
         st.info(f"### ❓ Question: {q.get('question_text', '')}")
-        st.caption(f"Category: **{q.get('category', '').title()}** | Difficulty: **{q.get('difficulty', '').title()}**")
+        st.caption(f"Category: **{str(q.get('category', '')).title()}** | Difficulty: **{str(q.get('difficulty', '')).title()}**")
         
         user_answer = st.text_area("Your Response", height=150, placeholder="Explain your answer clearly using STAR method or architectural rationale...")
         
@@ -600,11 +625,16 @@ elif page == "🎙️ Mock Interview Simulator":
                         answer_text=user_answer,
                         category=q.get("category", "technical")
                     ))
-                    st.session_state.last_interview_eval = eval_res
+                    eval_dict = to_dict(eval_res)
+                    if not eval_dict.get("improvements") and eval_dict.get("missed_points"):
+                        eval_dict["improvements"] = eval_dict["missed_points"]
+                    if not eval_dict.get("model_answer") and eval_dict.get("suggested_ideal_answer"):
+                        eval_dict["model_answer"] = eval_dict["suggested_ideal_answer"]
+                    st.session_state.last_interview_eval = eval_dict
                     st.success("Answer evaluated!")
                     
-    if "last_interview_eval" in st.session_state:
-        e = st.session_state.last_interview_eval
+    if "last_interview_eval" in st.session_state and st.session_state.last_interview_eval:
+        e = to_dict(st.session_state.last_interview_eval)
         st.markdown("---")
         st.subheader(f"📊 Evaluation Score: {e.get('score', 0)}/100")
         
@@ -615,11 +645,12 @@ elif page == "🎙️ Mock Interview Simulator":
                 st.markdown(f"- {s}")
         with f2:
             st.write("🎯 **Areas for Improvement**")
-            for imp in e.get("improvements", []):
+            imps = e.get("improvements", []) or e.get("missed_points", [])
+            for imp in imps:
                 st.markdown(f"- {imp}")
                 
         st.write("**Model Answer / Key Points:**")
-        st.info(e.get("model_answer", "Good technical depth shown."))
+        st.info(e.get("model_answer") or e.get("suggested_ideal_answer") or "Strong technical competency and structure shown.")
 
 # ==========================================
 # PAGE 7: 30-60-90 LEARNING PLAN
@@ -635,21 +666,29 @@ elif page == "🗺️ 30-60-90 Learning Plan":
             agent = LearningPlanAgent()
             gaps = [{"skill_name": s.strip(), "importance": "required"} for s in gap_skills.split(",") if s.strip()]
             plan = run_async(agent.generate_plan("Senior AI Full-Stack Engineer", gaps))
-            st.session_state.learning_plan = plan
+            st.session_state.learning_plan = to_dict(plan)
             st.success("Learning plan generated!")
             
-    if "learning_plan" in st.session_state:
-        plan = st.session_state.learning_plan
+    if "learning_plan" in st.session_state and st.session_state.learning_plan:
+        plan = to_dict(st.session_state.learning_plan)
         st.markdown("---")
         st.subheader(f"🎯 {plan.get('title', 'Target Mastery Roadmap')}")
-        st.write(plan.get("description", ""))
+        st.write(plan.get("description", plan.get("summary", "")))
         
-        for item in plan.get("items", []):
-            with st.expander(f"📅 Day {item.get('day_milestone', 30)}: {item.get('title', '')}", expanded=True):
-                st.markdown(f"**Objectives:** {item.get('description', '')}")
-                if item.get("resource_links"):
+        items = plan.get("items", [])
+        for raw_item in items:
+            item = to_dict(raw_item)
+            title = item.get("title") or f"Phase: {item.get('skill_name', 'Milestone')}"
+            desc = item.get("description", "")
+            if not desc and item.get("objectives"):
+                desc = "; ".join(item.get("objectives", []))
+            resources = item.get("resource_links") or item.get("resources") or []
+            
+            with st.expander(f"📅 Day {item.get('day_milestone', item.get('order_index', 1) * 30)}: {title}", expanded=True):
+                st.markdown(f"**Objectives:** {desc}")
+                if resources:
                     st.write("**Recommended Resources:**")
-                    for r in item["resource_links"]:
+                    for r in resources:
                         st.markdown(f"- {r}")
 
 # ==========================================

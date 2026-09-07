@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 import logging
 from typing import List, Dict, Any, Optional
 from app.core.ai_provider import AIProvider, get_ai_provider
@@ -57,18 +58,35 @@ Generate question #{order_index} covering core competencies, edge cases, or adap
             "order_index": order_index
         }
 
+    async def generate_question(
+        self,
+        role: str,
+        category: str = "technical",
+        difficulty: str = "medium",
+        history: list = None
+    ) -> Dict[str, Any]:
+        """Convenience wrapper matching Streamlit call signature."""
+        return await self.generate_next_question(
+            target_role=role,
+            interview_type=category,
+            order_index=len(history or []) + 1,
+            previous_qa=history
+        )
+
     async def evaluate_answer(
         self,
         question_text: str,
-        user_answer_text: str,
-        category: str = "Technical"
+        user_answer_text: str = None,
+        category: str = "Technical",
+        answer_text: str = None,
     ) -> InterviewAnswerFeedback:
+        ans = user_answer_text or answer_text or ""
         prompt = f"""
 QUESTION:
 {question_text}
 
 CANDIDATE ANSWER:
-{user_answer_text}
+{ans}
 
 CATEGORY: {category}
 
@@ -88,6 +106,7 @@ Evaluate this response objectively:
         interview_type: str,
         qa_history: List[Dict[str, Any]]
     ) -> InterviewReport:
+        now_dt = datetime.now(timezone.utc)
         if not qa_history:
             return InterviewReport(
                 id=interview_id,
@@ -98,7 +117,7 @@ Evaluate this response objectively:
                 overall_score=0.0,
                 total_questions=0,
                 questions_answered=0,
-                created_at="2026-09-07T00:00:00Z"
+                created_at=now_dt
             )
 
         avg_score = sum(qa.get("score", 0) for qa in qa_history) / len(qa_history)
@@ -132,5 +151,6 @@ Evaluate this response objectively:
             suggested_study_topics=["Distributed Systems", "Database Indexing", "Async Concurrency"],
             total_questions=len(qa_history),
             questions_answered=len(qa_history),
-            created_at="2026-09-07T00:00:00Z"
+            created_at=now_dt
         )
+

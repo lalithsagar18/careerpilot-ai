@@ -62,12 +62,20 @@ class Settings(BaseSettings):
 
     def get_database_url(self) -> str:
         if self.DATABASE_URL:
-            return self.DATABASE_URL
+            url = self.DATABASE_URL
+            if url.startswith("sqlite:///"):
+                url = url.replace("sqlite:///", "sqlite+aiosqlite:///")
+            return url
         return f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_SERVER}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
 
     def get_sync_database_url(self) -> str:
         if self.SYNC_DATABASE_URL:
             return self.SYNC_DATABASE_URL
+        if self.DATABASE_URL:
+            url = self.DATABASE_URL
+            if "sqlite+aiosqlite" in url:
+                return url.replace("sqlite+aiosqlite:///", "sqlite:///")
+            return url
         return f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_SERVER}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
 
 settings = Settings()

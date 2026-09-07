@@ -51,3 +51,69 @@ class DocumentExtractor:
         # Collapse excessive consecutive blank lines
         text = re.sub(r'\n{3,}', '\n\n', text)
         return text.strip()
+
+
+def assess_resume_quality(text: str) -> dict:
+    """Deterministic heuristic ATS resume quality assessment."""
+    if not text:
+        return {
+            "overall_score": 0.0,
+            "structural_score": 0.0,
+            "completeness_score": 0.0,
+            "action_verb_score": 0.0,
+            "quantified_metric_score": 0.0,
+            "recommendations": ["Upload a non-empty resume document."]
+        }
+
+    lines = [l.strip() for l in text.split("\n") if l.strip()]
+    word_count = len(text.split())
+
+    # Check structural sections
+    text_lower = text.lower()
+    sections_found = sum(
+        1 for s in ["experience", "education", "skill", "project", "summary", "certification"]
+        if s in text_lower
+    )
+    structural_score = min(100.0, (sections_found / 4.0) * 100.0)
+
+    # Check action verbs
+    action_verbs = [
+        "architected", "built", "developed", "engineered", "led", "designed",
+        "implemented", "optimized", "spearheaded", "orchestrated", "created",
+        "managed", "reduced", "increased", "delivered", "deployed"
+    ]
+    action_verb_matches = sum(1 for v in action_verbs if re.search(r'\b' + v + r'\b', text_lower))
+    action_verb_score = min(100.0, (action_verb_matches / 5.0) * 100.0)
+
+    # Check quantified metrics (e.g., numbers, percentages, dollar amounts)
+    metrics_matches = len(re.findall(r'(\d+[\.,]?\d*[%kMB\+]?|\$\d+)', text))
+    quantified_metric_score = min(100.0, (metrics_matches / 6.0) * 100.0)
+
+    # Completeness based on length & depth
+    completeness_score = min(100.0, max(40.0, (word_count / 350.0) * 100.0))
+
+    overall_score = round(
+        structural_score * 0.30 +
+        action_verb_score * 0.25 +
+        quantified_metric_score * 0.25 +
+        completeness_score * 0.20,
+        1
+    )
+
+    recs = []
+    if structural_score < 75:
+        recs.append("Add clear standard section headings (Experience, Skills, Education, Projects).")
+    if action_verb_score < 75:
+        recs.append("Start accomplishment bullets with strong action verbs (e.g. Architected, Engineered, Led).")
+    if quantified_metric_score < 75:
+        recs.append("Include more quantified impact metrics (e.g. reduced latency by 35%, managed 10M requests).")
+
+    return {
+        "overall_score": overall_score,
+        "structural_score": round(structural_score, 1),
+        "completeness_score": round(completeness_score, 1),
+        "action_verb_score": round(action_verb_score, 1),
+        "quantified_metric_score": round(quantified_metric_score, 1),
+        "recommendations": recs or ["Resume meets high ATS formatting and impact standards."]
+    }
+

@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -7,16 +8,27 @@ import uuid
 from app.core.config import settings
 from app.core.logging import setup_logging, logger
 from app.api.v1.router import api_v1_router
-from app.db.session import engine, Base
+from app.db.session import init_db
 import app.models  # load all models
 
 setup_logging()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    logger.info(f"Starting {settings.PROJECT_NAME} in {settings.ENVIRONMENT} mode...")
+    try:
+        await init_db()
+    except Exception as e:
+        logger.warning(f"Database initialization warning: {e}")
+    yield
+    logger.info(f"Shutting down {settings.PROJECT_NAME}...")
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
     docs_url=f"{settings.API_V1_STR}/docs",
     redoc_url=f"{settings.API_V1_STR}/redoc",
+    lifespan=lifespan,
 )
 
 # CORS Middleware
@@ -55,17 +67,6 @@ async def add_process_time_and_request_id(request: Request, call_next):
                 "request_id": request_id
             }
         )
-
-@app.on_event("startup")
-async def on_startup():
-    logger.info(f"Starting {settings.PROJECT_NAME} in {settings.ENVIRONMENT} mode...")
-    # Initialize database tables if using sqlite or dev
-    try:
-        async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
-        logger.info("Database schema initialized successfully.")
-    except Exception as e:
-        logger.warning(f"Database table initialization warning (ensure Postgres is running): {e}")
 
 # Mount API v1
 app.include_router(api_v1_router, prefix=settings.API_V1_STR)

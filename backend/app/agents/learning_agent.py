@@ -1,5 +1,5 @@
+from typing import List, Any, Optional
 import logging
-from typing import List
 from app.core.ai_provider import AIProvider, get_ai_provider
 from app.schemas.resume import CandidateProfile
 from app.schemas.job import StructuredJobData
@@ -20,17 +20,65 @@ class LearningPlanAgent:
 
     async def generate_plan(
         self,
-        candidate: CandidateProfile,
-        job: StructuredJobData,
-        missing_skills: List[MissingSkill],
-        partial_skills: List[PartialSkill]
-    ) -> LearningPlanCreate:
-        gap_names = [s.skill_name for s in missing_skills] + [s.skill_name for s in partial_skills]
-        
+        candidate: Any = None,
+        job: Any = None,
+        missing_skills: List[Any] = None,
+        partial_skills: List[Any] = None,
+        target_role: str = None,
+        skill_gaps: list = None
+    ) -> Any:
+        # Handle Streamlit or simplified positional signature (target_role, skill_gaps)
+        if isinstance(candidate, str):
+            role_str = candidate
+            gaps_in = job if isinstance(job, list) else (skill_gaps or [])
+            gap_names = []
+            for g in gaps_in:
+                if isinstance(g, dict):
+                    gap_names.append(g.get("skill_name", str(g)))
+                else:
+                    gap_names.append(str(g))
+            
+            prompt = f"""
+TARGET ROLE: {role_str}
+IDENTIFIED SKILL GAPS: {', '.join(gap_names) if gap_names else 'General Mastery'}
+
+Generate a structured 30-60-90 day learning curriculum:
+"""
+            res = await self.ai.generate_structured(
+                prompt=prompt,
+                schema=LearningPlanCreate,
+                system_instruction=LEARNING_PLAN_PROMPT
+            )
+            # Return dict format if called with simplified strings
+            return {
+                "title": f"Skill Mastery Plan: {role_str}",
+                "description": res.summary,
+                "items": [
+                    {
+                        "day_milestone": (it.order_index or idx + 1) * 30,
+                        "title": f"Phase {idx+1}: {it.skill_name}",
+                        "description": "; ".join(it.objectives),
+                        "resource_links": it.resources or ["Official Documentation"]
+                    }
+                    for idx, it in enumerate(res.items)
+                ]
+            }
+
+        # Handle structured CandidateProfile and StructuredJobData
+        cand_skills = candidate.technical_skills if candidate and hasattr(candidate, 'technical_skills') else ["Python"]
+        job_title = job.title if job and hasattr(job, 'title') else "Target Role"
+        job_comp = job.company if job and hasattr(job, 'company') else "Target Company"
+
+        gap_names = []
+        if missing_skills:
+            gap_names += [s.skill_name if hasattr(s, 'skill_name') else str(s) for s in missing_skills]
+        if partial_skills:
+            gap_names += [s.skill_name if hasattr(s, 'skill_name') else str(s) for s in partial_skills]
+
         prompt = f"""
-TARGET ROLE: {job.title} at {job.company}
-CANDIDATE CURRENT SKILLS: {', '.join(candidate.technical_skills)}
-IDENTIFIED SKILL GAPS: {', '.join(gap_names)}
+TARGET ROLE: {job_title} at {job_comp}
+CANDIDATE CURRENT SKILLS: {', '.join(cand_skills)}
+IDENTIFIED SKILL GAPS: {', '.join(gap_names) if gap_names else 'Core Competencies'}
 
 Generate a complete LearningPlanCreate schema with realistic milestones, projects, and interview prompts:
 """
@@ -39,3 +87,4 @@ Generate a complete LearningPlanCreate schema with realistic milestones, project
             schema=LearningPlanCreate,
             system_instruction=LEARNING_PLAN_PROMPT
         )
+

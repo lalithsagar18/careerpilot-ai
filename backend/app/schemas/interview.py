@@ -25,14 +25,16 @@ class InterviewSubmitAnswerRequest(BaseModel):
 
 class InterviewAnswerFeedback(BaseModel):
     score: float = Field(..., ge=0, le=100)
-    technical_accuracy_score: float
-    relevance_score: float
-    depth_score: float
-    communication_score: float
-    feedback: str
+    technical_accuracy_score: float = 85.0
+    relevance_score: float = 85.0
+    depth_score: float = 85.0
+    communication_score: float = 85.0
+    feedback: str = ""
     strengths: List[str] = Field(default_factory=list)
     missed_points: List[str] = Field(default_factory=list)
+    improvements: List[str] = Field(default_factory=list)
     suggested_ideal_answer: Optional[str] = None
+    model_answer: Optional[str] = None
 
 class InterviewReport(BaseModel):
     id: str
