@@ -16,6 +16,7 @@ import {
   Check,
   X,
   Edit3,
+  TrendingUp,
 } from "lucide-react";
 
 export default function OptimizePage() {
@@ -42,7 +43,7 @@ export default function OptimizePage() {
         if (rList.length > 0) setSelectedResumeId(rList[0].id);
         if (jList.length > 0) setSelectedJobId(jList[0].id);
       } catch {
-        setResumes([{ id: "res-1", title: "Senior AI Engineer Resume" }]);
+        setResumes([{ id: "res-1", title: "Principal AI & Backend Engineer Resume" }]);
         setJobs([{ id: "job-1", title: "Senior AI / Backend Engineer at NextGen AI Corp" }]);
         setSelectedResumeId("res-1");
         setSelectedJobId("job-1");
@@ -113,23 +114,34 @@ export default function OptimizePage() {
   return (
     <div className="flex">
       <Sidebar />
-      <div className="flex-1 p-6 md:p-8 space-y-8 max-w-7xl mx-auto">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">Resume Optimization Studio</h1>
-          <p className="text-sm text-gray-400 mt-1">
-            ATS bullet rewriting, targeted keyword alignment, and Human-in-the-Loop approval checkpoints with strict anti-fabrication rules.
-          </p>
+      <div className="flex-1 p-5 md:p-8 space-y-8 max-w-7xl mx-auto w-full">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-card p-6 rounded-3xl border-white/[0.08]">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-mono font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
+                ATS Optimizer Studio
+              </span>
+              <span className="text-xs text-gray-400">• Zero Fabrication Gatekeeper</span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mt-1">
+              Resume Optimization Studio
+            </h1>
+            <p className="text-xs sm:text-sm text-gray-300">
+              ATS keyword alignment, bullet reframing, and Human-in-the-Loop approval checkpoints with strict factual grounding.
+            </p>
+          </div>
         </div>
 
         {/* Configuration Bar */}
-        <div className="glass-card p-6 rounded-2xl border-gray-800 space-y-4">
+        <div className="glass-card p-6 rounded-3xl border-white/[0.08] space-y-4 shadow-xl">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-semibold text-gray-300">Base Resume</label>
+              <label className="text-xs font-bold text-gray-300">Base Resume</label>
               <select
                 value={selectedResumeId}
                 onChange={(e) => setSelectedResumeId(e.target.value)}
-                className="w-full mt-1.5 px-3.5 py-2.5 rounded-xl bg-gray-900 border border-gray-800 text-white text-sm focus:outline-none focus:border-indigo-500"
+                className="w-full mt-1.5 px-4 py-3 rounded-2xl bg-gray-950 border border-white/[0.08] text-white text-xs sm:text-sm focus:outline-none focus:border-indigo-500"
               >
                 {resumes.map((r) => (
                   <option key={r.id} value={r.id}>{r.title}</option>
@@ -138,11 +150,11 @@ export default function OptimizePage() {
             </div>
 
             <div>
-              <label className="text-xs font-semibold text-gray-300">Target Job Posting</label>
+              <label className="text-xs font-bold text-gray-300">Target Job Posting</label>
               <select
                 value={selectedJobId}
                 onChange={(e) => setSelectedJobId(e.target.value)}
-                className="w-full mt-1.5 px-3.5 py-2.5 rounded-xl bg-gray-900 border border-gray-800 text-white text-sm focus:outline-none focus:border-indigo-500"
+                className="w-full mt-1.5 px-4 py-3 rounded-2xl bg-gray-950 border border-white/[0.08] text-white text-xs sm:text-sm focus:outline-none focus:border-indigo-500"
               >
                 {jobs.map((j) => (
                   <option key={j.id} value={j.id}>{j.title} ({j.company || "Job"})</option>
@@ -152,24 +164,24 @@ export default function OptimizePage() {
           </div>
 
           <div>
-            <label className="text-xs font-semibold text-gray-300">Custom Emphasis Instructions (Optional)</label>
+            <label className="text-xs font-bold text-gray-300">Custom Emphasis Instructions (Optional)</label>
             <input
               type="text"
               value={customInstructions}
               onChange={(e) => setCustomInstructions(e.target.value)}
-              placeholder="e.g. Highlight distributed systems scalability and async concurrency..."
-              className="w-full mt-1 px-3.5 py-2.5 rounded-xl bg-gray-900 border border-gray-800 text-white text-xs focus:outline-none focus:border-indigo-500"
+              placeholder="e.g. Highlight distributed systems scalability and asynchronous microservices..."
+              className="w-full mt-1 px-4 py-3 rounded-2xl bg-gray-950 border border-white/[0.08] text-white text-xs sm:text-sm focus:outline-none focus:border-indigo-500"
             />
           </div>
 
-          <div className="flex items-center justify-between pt-2">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
             <span className="text-xs text-gray-400 flex items-center gap-1.5">
               <ShieldCheck className="h-4 w-4 text-emerald-400" /> Factual integrity guaranteed by independent Evaluator Agent
             </span>
             <button
               onClick={handleOptimize}
               disabled={optimizing}
-              className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-indigo-600 hover:from-emerald-500 hover:to-indigo-500 text-white font-semibold text-xs shadow-lg shadow-emerald-600/30 transition-all flex items-center gap-2 disabled:opacity-50"
+              className="w-full sm:w-auto px-7 py-3 rounded-2xl bg-gradient-to-r from-emerald-600 via-indigo-600 to-purple-600 hover:from-emerald-500 hover:to-indigo-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/30 transition-all flex items-center justify-center gap-2 disabled:opacity-50 hover:scale-[1.02]"
             >
               {optimizing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
               Generate ATS Optimization
@@ -181,24 +193,26 @@ export default function OptimizePage() {
         {optimization && (
           <div className="space-y-6">
             {/* ATS Score Improvement Banner */}
-            <div className="glass-card p-6 rounded-2xl border-emerald-500/30 flex flex-col md:flex-row items-center justify-between gap-6">
-              <div className="space-y-1">
-                <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">Projected ATS Match</span>
+            <div className="glass-card p-6 md:p-8 rounded-3xl border-emerald-500/30 flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl">
+              <div className="space-y-2">
+                <span className="text-xs font-mono font-bold uppercase tracking-wider text-emerald-400">
+                  Projected ATS Match
+                </span>
                 <div className="flex items-baseline gap-3">
-                  <span className="text-3xl font-extrabold text-white">{optimization.ats_score_projected}%</span>
-                  <span className="text-xs font-medium text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md">
-                    +{Math.round(optimization.ats_score_projected - optimization.ats_score_before)}% Improvement
+                  <span className="text-4xl font-black text-white font-mono">{optimization.ats_score_projected}%</span>
+                  <span className="text-xs font-bold text-emerald-300 bg-emerald-500/20 border border-emerald-500/30 px-3 py-1 rounded-xl flex items-center gap-1">
+                    <TrendingUp className="h-3.5 w-3.5" /> +{Math.round(optimization.ats_score_projected - optimization.ats_score_before)}% Improvement
                   </span>
                 </div>
-                <p className="text-xs text-gray-400">{optimization.factual_verification_notes}</p>
+                <p className="text-xs text-gray-300">{optimization.factual_verification_notes}</p>
               </div>
 
               {/* Keywords Matched */}
-              <div className="space-y-1.5 text-right">
-                <span className="text-xs text-gray-400">Target Keywords Activated</span>
-                <div className="flex flex-wrap justify-end gap-1.5 max-w-md">
+              <div className="space-y-2 text-left md:text-right">
+                <span className="text-xs text-gray-400 font-mono">Target Keywords Activated</span>
+                <div className="flex flex-wrap justify-start md:justify-end gap-1.5 max-w-md">
                   {optimization.targeted_keywords_matched.map((kw: string, i: number) => (
-                    <span key={i} className="px-2.5 py-0.5 rounded-md text-[11px] font-medium bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
+                    <span key={i} className="px-3 py-1 rounded-xl text-xs font-semibold bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
                       {kw}
                     </span>
                   ))}
@@ -214,25 +228,29 @@ export default function OptimizePage() {
 
               <div className="space-y-4">
                 {optimization.bullet_rewrites.map((br: any, idx: number) => (
-                  <div key={idx} className="glass-card p-5 rounded-2xl border-gray-800 space-y-3">
-                    <span className="text-xs font-semibold text-indigo-400">{br.section}</span>
+                  <div key={idx} className="glass-card p-6 rounded-3xl border-white/[0.08] space-y-4">
+                    <span className="text-xs font-bold text-indigo-400 font-mono">{br.section}</span>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {/* Original */}
-                      <div className="p-3.5 rounded-xl bg-red-950/20 border border-red-500/20 space-y-1">
-                        <span className="text-[11px] font-bold text-red-400 uppercase tracking-wider">Original Bullet</span>
+                      <div className="p-4 rounded-2xl bg-rose-950/20 border border-rose-500/20 space-y-1.5">
+                        <span className="text-[10px] font-mono font-bold text-rose-400 uppercase tracking-wider">
+                          Original Bullet
+                        </span>
                         <p className="text-xs text-gray-300 leading-relaxed">{br.original_bullet}</p>
                       </div>
 
                       {/* Optimized */}
-                      <div className="p-3.5 rounded-xl bg-emerald-950/20 border border-emerald-500/20 space-y-1">
-                        <span className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Optimized ATS Bullet</span>
+                      <div className="p-4 rounded-2xl bg-emerald-950/20 border border-emerald-500/20 space-y-1.5">
+                        <span className="text-[10px] font-mono font-bold text-emerald-400 uppercase tracking-wider">
+                          Optimized ATS Bullet
+                        </span>
                         <p className="text-xs text-emerald-200 leading-relaxed font-medium">{br.optimized_bullet}</p>
                       </div>
                     </div>
 
-                    <p className="text-[11px] text-gray-400 italic pt-1 border-t border-gray-800/60">
-                      Rationale: {br.rationale}
+                    <p className="text-xs text-gray-400 italic pt-2 border-t border-white/[0.06]">
+                      <strong className="text-gray-300">Rationale:</strong> {br.rationale}
                     </p>
                   </div>
                 ))}
@@ -240,26 +258,26 @@ export default function OptimizePage() {
             </div>
 
             {/* Human in the Loop Approval Checkpoint */}
-            <div className="glass-card p-6 rounded-2xl border-purple-500/30 space-y-4">
-              <div className="flex items-center justify-between">
+            <div className="glass-card p-6 md:p-8 rounded-3xl border-purple-500/30 space-y-4 shadow-xl">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
                   <h4 className="text-sm font-bold text-white flex items-center gap-2">
-                    <ShieldCheck className="h-4 w-4 text-purple-400" /> Human Approval Checkpoint
+                    <ShieldCheck className="h-4 w-4 text-purple-400" /> Human Sovereign Approval Checkpoint
                   </h4>
                   <p className="text-xs text-gray-400 mt-0.5">
                     You maintain complete control. Review the proposed optimization before accepting it into your official resume history.
                   </p>
                 </div>
                 {approved && (
-                  <span className="px-3 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-semibold">
+                  <span className="px-3.5 py-1 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold font-mono">
                     Approved Version Active
                   </span>
                 )}
               </div>
 
               {approvalMessage && (
-                <div className={`p-3.5 rounded-xl text-xs flex items-center gap-2 ${approved ? "bg-emerald-500/10 text-emerald-300 border border-emerald-500/20" : "bg-red-500/10 text-red-300 border border-red-500/20"}`}>
-                  {approved ? <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" /> : <AlertCircle className="h-4 w-4 text-red-400 shrink-0" />}
+                <div className={`p-4 rounded-2xl text-xs flex items-center gap-2.5 ${approved ? "bg-emerald-500/10 text-emerald-300 border border-emerald-500/20" : "bg-rose-500/10 text-rose-300 border border-rose-500/20"}`}>
+                  {approved ? <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" /> : <AlertCircle className="h-4 w-4 text-rose-400 shrink-0" />}
                   <span>{approvalMessage}</span>
                 </div>
               )}
@@ -268,15 +286,15 @@ export default function OptimizePage() {
                 <button
                   onClick={() => handleApproval("approve")}
                   disabled={approved}
-                  className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs shadow-md shadow-emerald-600/30 transition-all flex items-center gap-2 disabled:opacity-50"
+                  className="px-6 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md shadow-emerald-600/30 transition-all flex items-center gap-2 disabled:opacity-50"
                 >
                   <Check className="h-4 w-4" /> Approve & Save Version
                 </button>
                 <button
                   onClick={() => handleApproval("reject")}
-                  className="px-5 py-2.5 rounded-xl glass-card text-gray-300 hover:text-white border-gray-700 text-xs font-semibold transition-all flex items-center gap-2"
+                  className="px-6 py-3 rounded-2xl glass-card text-gray-300 hover:text-white border-white/[0.08] text-xs font-semibold transition-all flex items-center gap-2"
                 >
-                  <X className="h-4 w-4" /> Reject / Request Re-generation
+                  <X className="h-4 w-4" /> Reject / Request Revision
                 </button>
               </div>
             </div>

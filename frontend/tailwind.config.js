@@ -16,12 +16,29 @@ module.exports = {
       },
     },
     extend: {
+      fontFamily: {
+        sans: ['var(--font-sans)', 'system-ui', 'sans-serif'],
+        mono: ['var(--font-mono)', 'monospace'],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
+        brand: {
+          50: '#eef2ff',
+          100: '#e0e7ff',
+          200: '#c7d2fe',
+          300: '#a5b4fc',
+          400: '#818cf8',
+          500: '#6366f1',
+          600: '#4f46e5',
+          700: '#4338ca',
+          800: '#3730a3',
+          900: '#312e81',
+          950: '#1e1b4b',
+        },
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
@@ -67,14 +84,30 @@ module.exports = {
           to: { height: 0 },
         },
         pulseGlow: {
-          '0%, 100%': { opacity: 0.4, transform: 'scale(1)' },
-          '50%': { opacity: 0.8, transform: 'scale(1.05)' },
+          '0%, 100%': { opacity: '0.4', transform: 'scale(1)' },
+          '50%': { opacity: '0.8', transform: 'scale(1.05)' },
+        },
+        floatSlow: {
+          '0%, 100%': { transform: 'translateY(0px)' },
+          '50%': { transform: 'translateY(-8px)' },
+        },
+        shimmer: {
+          '0%': { backgroundPosition: '-200% 0' },
+          '100%': { backgroundPosition: '200% 0' },
+        },
+        pulseBorder: {
+          '0%, 100%': { borderColor: 'rgba(99, 102, 241, 0.3)' },
+          '50%': { borderColor: 'rgba(168, 85, 247, 0.6)' },
         }
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        "pulse-glow": "pulseGlow 3s ease-in-out infinite",
+        "pulse-glow": "pulseGlow 4s ease-in-out infinite",
+        "pulse-slow": "pulseGlow 6s ease-in-out infinite",
+        "float-slow": "floatSlow 5s ease-in-out infinite",
+        "shimmer": "shimmer 2.5s infinite linear",
+        "pulse-border": "pulseBorder 3s ease-in-out infinite",
       },
     },
   },

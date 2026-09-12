@@ -13,6 +13,7 @@ import {
   Sparkles,
   Trash2,
   CheckCircle2,
+  X,
 } from "lucide-react";
 
 const COLUMNS = ["Saved", "Preparing", "Applied", "Interview", "Offer", "Rejected"];
@@ -55,7 +56,7 @@ export default function ApplicationsPage() {
           role_title: "Senior AI / Backend Engineer",
           status: "Saved",
           salary_offered: "$185,000",
-          notes: "Match score calculated at 87.5%.",
+          notes: "Match score calculated deterministically at 87.5%.",
         }
       ]);
     }
@@ -115,18 +116,27 @@ export default function ApplicationsPage() {
   return (
     <div className="flex">
       <Sidebar />
-      <div className="flex-1 p-6 md:p-8 space-y-8 max-w-7xl mx-auto">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex-1 p-5 md:p-8 space-y-8 max-w-7xl mx-auto w-full">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-card p-6 rounded-3xl border-white/[0.08]">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">Job Applications Tracker</h1>
-            <p className="text-sm text-gray-400 mt-1">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-mono font-bold uppercase tracking-wider text-purple-400 bg-purple-500/10 px-2.5 py-0.5 rounded-full border border-purple-500/20">
+                Pipeline Tracker
+              </span>
+              <span className="text-xs text-gray-400">• Interactive Kanban</span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mt-1">
+              Job Applications Tracker
+            </h1>
+            <p className="text-xs sm:text-sm text-gray-300">
               Kanban pipeline and status tracking for all target roles and AI-optimized applications.
             </p>
           </div>
 
           <button
             onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-md shadow-indigo-600/30 transition-all"
+            className="flex items-center justify-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs font-bold shadow-lg shadow-indigo-600/30 transition-all hover:scale-[1.02]"
           >
             <Plus className="h-4 w-4" /> Add Application
           </button>
@@ -137,10 +147,10 @@ export default function ApplicationsPage() {
           {COLUMNS.map((col) => {
             const colApps = applications.filter((a) => a.status === col);
             return (
-              <div key={col} className="glass-card p-4 rounded-2xl border-gray-800 flex flex-col min-w-[200px]">
-                <div className="flex items-center justify-between pb-3 border-b border-gray-800 mb-3">
-                  <span className="text-xs font-bold uppercase tracking-wider text-gray-300">{col}</span>
-                  <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-gray-900 text-indigo-400 border border-gray-800">
+              <div key={col} className="glass-card p-4 rounded-3xl border-white/[0.08] flex flex-col min-w-[220px] shadow-lg">
+                <div className="flex items-center justify-between pb-3 border-b border-white/[0.06] mb-3">
+                  <span className="text-xs font-bold uppercase tracking-wider text-gray-300 font-mono">{col}</span>
+                  <span className="text-xs font-bold font-mono px-2 py-0.5 rounded-lg bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
                     {colApps.length}
                   </span>
                 </div>
@@ -149,29 +159,29 @@ export default function ApplicationsPage() {
                   {colApps.map((app) => (
                     <div
                       key={app.id}
-                      className="p-3.5 rounded-xl bg-gray-900/80 border border-gray-800 hover:border-indigo-500/50 transition-all space-y-2 text-xs"
+                      className="p-4 rounded-2xl bg-gray-950/80 border border-white/[0.08] hover:border-indigo-500/50 transition-all space-y-2.5 text-xs shadow-sm hover:shadow-indigo-500/10"
                     >
-                      <p className="font-semibold text-white leading-tight">{app.role_title}</p>
-                      <p className="text-indigo-400 font-medium">{app.company}</p>
+                      <p className="font-bold text-white leading-snug">{app.role_title}</p>
+                      <p className="text-indigo-400 font-semibold">{app.company}</p>
 
                       {app.salary_offered && (
-                        <span className="inline-block text-[11px] text-emerald-400 font-mono">
+                        <span className="inline-block text-[11px] text-emerald-400 font-mono font-bold bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20">
                           {app.salary_offered}
                         </span>
                       )}
 
                       {app.notes && (
-                        <p className="text-[11px] text-gray-400 line-clamp-2 italic">{app.notes}</p>
+                        <p className="text-[11px] text-gray-400 line-clamp-2 italic leading-relaxed">{app.notes}</p>
                       )}
 
                       {/* Status quick select */}
                       <select
                         value={app.status}
                         onChange={(e) => updateStatus(app.id, e.target.value)}
-                        className="w-full mt-2 py-1 px-2 rounded-lg bg-gray-950 border border-gray-800 text-[10px] text-gray-300 focus:outline-none"
+                        className="w-full mt-2 py-1.5 px-2.5 rounded-xl bg-gray-900 border border-white/[0.08] text-[11px] text-gray-300 focus:outline-none focus:border-indigo-500 font-mono"
                       >
                         {COLUMNS.map((c) => (
-                          <option key={c} value={c}>Move to {c}</option>
+                          <option key={c} value={c}>Stage: {c}</option>
                         ))}
                       </select>
                     </div>
@@ -184,39 +194,48 @@ export default function ApplicationsPage() {
 
         {/* Add Modal */}
         {showAddModal && (
-          <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="w-full max-w-md glass-card p-6 rounded-2xl border-gray-800 space-y-4 shadow-2xl">
-              <h3 className="text-base font-bold text-white">Add Job Application</h3>
-              <form onSubmit={handleCreate} className="space-y-3">
+          <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+            <div className="w-full max-w-md glass-card p-6 md:p-8 rounded-3xl border-white/[0.1] space-y-4 shadow-2xl">
+              <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
+                <h3 className="text-base font-bold text-white">Add Job Application</h3>
+                <button
+                  onClick={() => setShowAddModal(false)}
+                  className="text-gray-400 hover:text-white"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              <form onSubmit={handleCreate} className="space-y-3.5">
                 <div>
-                  <label className="text-xs text-gray-400 font-medium">Company</label>
+                  <label className="text-xs font-bold text-gray-300">Company Name</label>
                   <input
                     type="text"
                     required
                     value={company}
                     onChange={(e) => setCompany(e.target.value)}
-                    placeholder="e.g. Google, Anthropic"
-                    className="w-full mt-1 px-3 py-2 rounded-xl bg-gray-900 border border-gray-800 text-white text-xs"
+                    placeholder="e.g. Google, Anthropic, Stripe"
+                    className="w-full mt-1.5 px-4 py-2.5 rounded-2xl bg-gray-950 border border-white/[0.08] text-white text-xs focus:outline-none focus:border-indigo-500"
                   />
                 </div>
                 <div>
-                  <label className="text-xs text-gray-400 font-medium">Role Title</label>
+                  <label className="text-xs font-bold text-gray-300">Role Title</label>
                   <input
                     type="text"
                     required
                     value={roleTitle}
                     onChange={(e) => setRoleTitle(e.target.value)}
                     placeholder="e.g. Senior Machine Learning Engineer"
-                    className="w-full mt-1 px-3 py-2 rounded-xl bg-gray-900 border border-gray-800 text-white text-xs"
+                    className="w-full mt-1.5 px-4 py-2.5 rounded-2xl bg-gray-950 border border-white/[0.08] text-white text-xs focus:outline-none focus:border-indigo-500"
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs text-gray-400 font-medium">Pipeline Status</label>
+                    <label className="text-xs font-bold text-gray-300">Pipeline Stage</label>
                     <select
                       value={status}
                       onChange={(e) => setStatus(e.target.value)}
-                      className="w-full mt-1 px-3 py-2 rounded-xl bg-gray-900 border border-gray-800 text-white text-xs"
+                      className="w-full mt-1.5 px-4 py-2.5 rounded-2xl bg-gray-950 border border-white/[0.08] text-white text-xs focus:outline-none focus:border-indigo-500"
                     >
                       {COLUMNS.map((c) => (
                         <option key={c} value={c}>{c}</option>
@@ -224,24 +243,24 @@ export default function ApplicationsPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="text-xs text-gray-400 font-medium">Target Salary</label>
+                    <label className="text-xs font-bold text-gray-300">Target Salary</label>
                     <input
                       type="text"
                       value={salary}
                       onChange={(e) => setSalary(e.target.value)}
-                      placeholder="$180,000"
-                      className="w-full mt-1 px-3 py-2 rounded-xl bg-gray-900 border border-gray-800 text-white text-xs"
+                      placeholder="$185,000"
+                      className="w-full mt-1.5 px-4 py-2.5 rounded-2xl bg-gray-950 border border-white/[0.08] text-white text-xs focus:outline-none focus:border-indigo-500"
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="text-xs text-gray-400 font-medium">Notes</label>
+                  <label className="text-xs font-bold text-gray-300">Notes & Interview Details</label>
                   <textarea
                     rows={3}
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
-                    placeholder="Referrals, recruiter contacts, interview dates..."
-                    className="w-full mt-1 px-3 py-2 rounded-xl bg-gray-900 border border-gray-800 text-white text-xs"
+                    placeholder="Referral contact, recruiter notes, system design dates..."
+                    className="w-full mt-1.5 px-4 py-2.5 rounded-2xl bg-gray-950 border border-white/[0.08] text-white text-xs focus:outline-none focus:border-indigo-500"
                   />
                 </div>
 
@@ -249,13 +268,13 @@ export default function ApplicationsPage() {
                   <button
                     type="button"
                     onClick={() => setShowAddModal(false)}
-                    className="px-4 py-2 rounded-xl glass-card text-xs text-gray-300"
+                    className="px-5 py-2.5 rounded-2xl glass-card text-xs font-semibold text-gray-300"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs shadow-md shadow-indigo-600/30"
+                    className="px-6 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md shadow-indigo-600/30"
                   >
                     Save Application
                   </button>
